@@ -5,8 +5,7 @@ let puppeteer;
 app.get('/api', async (req, res) => {
     chrome = require('chrome-aws-lambda');
     if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-        // running on the Vercel platform.
-        
+        // running on the Vercel platform.        
         puppeteer = require('puppeteer-core');
     } else {
         // running locally.        
@@ -14,15 +13,17 @@ app.get('/api', async (req, res) => {
     }
 
     try {
-        let browser = await puppeteer.launch({
-            args: [...chrome.args, '--hide-scrollbars', '--disable-web-security'],
+        let browser = await puppeteer.launch({            
+            args: chrome.arg,
             defaultViewport: chrome.defaultViewport,
             executablePath: await chrome.executablePath,
             headless: true,
             ignoreHTTPSErrors: true,
         });
         const page = await browser.newPage()
-        await page.goto('https://api.investing.com/api/financialdata/101599/historical/chart/?period=P5Y&interval=P1W&pointscount=120')
+        await page.goto('https://api.investing.com/api/financialdata/101599/historical/chart/?period=P5Y&interval=P1W&pointscount=120')        
+        console.log(page)
+        await page.waitForSelector('pre')
         let pre = await page.$('pre')
         let content = await page.evaluate(el => el.textContent, pre)
         res.send(content)
