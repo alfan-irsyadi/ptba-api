@@ -9,7 +9,7 @@ app.get('/api', async (req, res) => {
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
             executablePath: await chromium.executablePath,
-            headless: false,
+            headless: true,
             ignoreHTTPSErrors: true
         })
     const page = await browser.newPage()
