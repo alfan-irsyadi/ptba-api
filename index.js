@@ -4,39 +4,41 @@ let chrome = {};
 let puppeteer;
 
 if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  chrome = require("chrome-aws-lambda");
-  puppeteer = require("puppeteer-core");
+    chrome = require("chrome-aws-lambda");
+    puppeteer = require("puppeteer-core");
 } else {
-  puppeteer = require("puppeteer");
+    puppeteer = require("puppeteer");
 }
 
 app.get("/api", async (req, res) => {
-  let options = {};
+    let options = {};
 
-  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options = {
-      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      headless: true,
-      ignoreHTTPSErrors: true,
-    };
-  }
+    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+        options = {
+            args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+            defaultViewport: chrome.defaultViewport,
+            executablePath: await chrome.executablePath,
+            headless: true,
+            ignoreHTTPSErrors: true,
+        };
+    }
 
-  try {
-    let browser = await puppeteer.launch(options);
+    try {
+        let browser = await puppeteer.launch(options);
 
-    let page = await browser.newPage();
-    await page.goto("https://www.google.com");
-    res.send(await page.title());
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
+        let page = await browser.newPage();
+        await page.goto("https://api.investing.com/api/financialdata/101599/historical/chart/?period=P5Y&interval=P1W&pointscount=120");
+        let pre = await page.$('pre')
+        let content = await page.evaluate(el => el.textContent, pre)
+        res.send(await page.title());
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
 });
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Server started");
+    console.log("Server started");
 });
 
 module.exports = app;
